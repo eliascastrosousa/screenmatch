@@ -655,7 +655,7 @@ Este projeto foi utilizado para consolidar conceitos importantes do desenvolvime
 
 Algumas evoluções naturais para o projeto:
 
-- [ ] Persistir séries em banco de dados;
+- [x] Persistir séries em banco de dados;
 - [ ] Criar uma API REST com Spring Boot;
 - [ ] Separar Controller, Service e Repository;
 - [ ] Criar endpoints para consulta das séries;
