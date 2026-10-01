@@ -16,8 +16,6 @@ public class SerieService {
     private final String chave = "&apikey=86023a29";
     private ConsumoAPI consumoAPI = new ConsumoAPI();
     private ConverteDados converteDados = new ConverteDados();
-    private String buscaTitulo;
-    private String endereco;
     Scanner sc = new Scanner(System.in);
     List<DadosTemporada> temporadas = new ArrayList<>();
     List<Serie> listaSeries = new ArrayList<>();
@@ -34,28 +32,36 @@ public class SerieService {
         System.out.println("\nDigite o nome da Serie: ");
         var buscaTitulo = sc.nextLine();
 
-        var json = consumoAPI.obterDados(ENDERECO + buscaTitulo.replace(" ", "+") + chave);
-        System.out.println(json);
-        DadosSerie dados = converteDados.obterDadosDoJsonParaObjeto(json, DadosSerie.class);
-        String sinopse = tradutor.traduzir(dados.sinopse());
+        try {
+            var json = consumoAPI.obterDados(ENDERECO + buscaTitulo.replace(" ", "+") + chave);
+            System.out.println(json);
+            DadosSerie dados = converteDados.obterDadosDoJsonParaObjeto(json, DadosSerie.class);
+            if (dados.tipo() == "serie") {
+                String sinopse = tradutor.traduzir(dados.sinopse());
 
-        if (sinopse == null) {
-            Serie serie = new Serie(dados);
-            System.out.println(serie);
-            System.out.println("Não foi possivel traduzir a sinopse. ");
-            listaSeries.add(serie);
-            repository.save(serie);
+                if (sinopse == null) {
+                    Serie serie = new Serie(dados);
+                    System.out.println("Serie: " + serie);
+                    System.out.println("Não foi possivel traduzir a sinopse. ");
+                    //listaSeries.add(serie);
+                    repository.save(serie);
 
-        }else {
-            Serie serie = new Serie(dados, sinopse);
-            System.out.println("sinopse traduzida: " + sinopse);
-            listaSeries.add(serie);
-            System.out.println(serie);
-            repository.save(serie);
+                } else {
+                    Serie serie = new Serie(dados, sinopse);
+                    System.out.println("sinopse traduzida: " + sinopse);
+                    //listaSeries.add(serie);
+                    System.out.println(serie);
+                    repository.save(serie);
 
+                }
+            }else {
+                System.out.println("Tente novamnte com uma Serie.");
+            }
+
+            System.out.println("\nRetornando ao Menu...");
+        } catch (RuntimeException e) {
+            System.out.println("Não foi possivel salvar a serie: " + e.getMessage());
         }
-
-        System.out.println("\nRetornando ao Menu...");
 
     }
 
@@ -118,7 +124,88 @@ public class SerieService {
         return temporadas;
     }
 
+    public void buscarSeriePorTitulo() {
+        System.out.println("\nDigite o nome da Serie: ");
+        var buscaTitulo = sc.nextLine();
+
+        Optional<Serie> serieEncontrada =
+         repository.findByTituloContainingIgnoreCase(buscaTitulo);
+
+        if (serieEncontrada.isPresent()) {
+            System.out.println("Dados da Série: ");
+            Serie serie = serieEncontrada.get();
+            System.out.println(serie);
+        }else {
+            System.out.println("Serie nao encontrada.");
+        }
+    }
+
+    public void buscarSeriesPorAtor() {
+        System.out.println("\nDigite o nome do Ator: ");
+        var buscaTitulos = sc.nextLine();
+
+        List<Serie> seriesEncontradas =
+                repository.findByAtoresContainingIgnoreCaseAndAvaliacaoGreaterThanEqual(buscaTitulos, 8.5);
+
+        if (seriesEncontradas.isEmpty()) {
+            System.out.println("Series nao encontradas.");
+
+        }else {
+            System.out.println("Séries encontradas: ");
+            seriesEncontradas.forEach(System.out::println);
+        }
+
+    }
+
+    public void buscarTop5Series() {
+        List<Serie> seriesEncontradas =
+                repository.findTop5ByOrderByAvaliacaoDesc();
+
+        if (seriesEncontradas.isEmpty()) {
+            System.out.println("Series nao encontradas.");
+
+        }else {
+            System.out.println("Séries encontradas: ");
+            seriesEncontradas.forEach(s-> System.out.println(s.getTitulo() + " Nota: " + s.getAvaliacao() ));
+        }
+    }
+
+    public void buscarSeriesPorCategoria() {
+        System.out.println("Deseja buscar serie por qual categoria? ");
+        var nomeGenero = sc.nextLine();
+        Categoria categoria = Categoria.fromPortugues(nomeGenero);
+        if (categoria == null) {
+            System.out.println("Não foi possivel encontrar as series na categoria informada.");
+        }else {
+            listaSeries = repository.findByGenero(categoria);
+            System.out.println("Series da categoria: " + categoria);
+            listaSeries.forEach(System.out::println);
+        }
+    }
+
+    public void buscarSeriesPorAvaliacaoTemporadas() {
+        System.out.println("Digite a avaliacao que deseja buscar: ");
+        double avaliacao = sc.nextDouble();
+        System.out.println("Qual numero de temporadas? ");
+        int ntemporadas = sc.nextInt();
+
+        listaSeries = repository.findByAvaliacaoGreaterThanEqualAndTotalTemporadas(avaliacao, ntemporadas);
+        if (listaSeries.isEmpty()){
+            System.out.println("Series nao encontradas.");
+        }else {
+            System.out.println("Series encontradas: ");
+            listaSeries.forEach(System.out::println);
+        }
+    }
 }
+
+
+
+
+
+
+
+
 
 
 

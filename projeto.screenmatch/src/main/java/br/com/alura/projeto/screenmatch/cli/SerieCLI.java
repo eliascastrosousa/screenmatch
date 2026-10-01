@@ -23,6 +23,11 @@ public class SerieCLI {
             1 - Buscar Séries
             2 - Buscar Episódios
             3 - Listar Séries Buscadas
+            4 - Buscar serie por Titulo
+            5 - Buscar Series por Ator
+            6 - Buscar top 5 Series
+            7 - Buscar Series top categoria
+            8 - Busca Personalizada Avaliacao e Temporadas
             
             0 - Sair
             
@@ -44,12 +49,14 @@ public class SerieCLI {
                         break;
 
                     case "1":
-                        System.out.println("\n**** Busca Séries ****");
+                        System.out.println("\nBuscar Séries\n-------------------------------------\n");
+
                         serieService.buscaSerie();
                         break;
 
                     case "2":
-                        System.out.println("\n***** Busca Episódios *****\n");
+                        System.out.println("\nBusca Episódios\n-------------------------------------\n");
+
                         serieService.buscaEpisodios();
                         break;
 
@@ -57,6 +64,29 @@ public class SerieCLI {
                         System.out.println("\nListar Séries Buscadas\n-------------------------------------\n");
                         serieService.listarSeriesBuscadas();
                         break;
+
+                    case "4":
+                        System.out.println("\nBuscar Serie por titulo\n-------------------------------------\n");
+                        serieService.buscarSeriePorTitulo();
+                        break;
+                    case "5":
+                        System.out.println("\nBuscar Series por ator\n-------------------------------------\n");
+                        serieService.buscarSeriesPorAtor();
+                        break;
+                    case "6":
+                        System.out.println("\nBuscar Top 5 Series\n-------------------------------------\n");
+                        serieService.buscarTop5Series();
+                        break;
+                    case "7":
+                        System.out.println("\nBuscar Series top categoria\n-------------------------------------\n");
+                        serieService.buscarSeriesPorCategoria();
+                        break;
+                    case "8":
+                        System.out.println("\nBusca Personalizada Avaliacao e Temporadas\n-------------------------------------\n");
+                        serieService.buscarSeriesPorAvaliacaoTemporadas();
+                        break;
+
+
 
                     default:
                         System.out.println("\nResposta inválida!");
