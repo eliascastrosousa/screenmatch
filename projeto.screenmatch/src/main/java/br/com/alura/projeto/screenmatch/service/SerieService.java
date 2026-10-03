@@ -2,11 +2,13 @@ package br.com.alura.projeto.screenmatch.service;
 
 import br.com.alura.projeto.screenmatch.dto.DadosSerie;
 import br.com.alura.projeto.screenmatch.dto.DadosTemporada;
+import br.com.alura.projeto.screenmatch.dto.SerieDTO;
 import br.com.alura.projeto.screenmatch.model.*;
 import br.com.alura.projeto.screenmatch.repository.SerieRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -19,6 +21,7 @@ public class SerieService {
     Scanner sc = new Scanner(System.in);
     List<DadosTemporada> temporadas = new ArrayList<>();
     List<Serie> listaSeries = new ArrayList<>();
+    List<SerieDTO> listaSeriesDTO = new ArrayList<>();
 
     private final SerieRepository repository;
 
@@ -65,7 +68,7 @@ public class SerieService {
 
     }
 
-    public void listarSeriesBuscadas() {
+    public List<SerieDTO> listarSeriesBuscadas() {
 
 //        listaSeries.stream().sorted(Comparator.comparing(Serie::getGenero)
 //                        .reversed())
@@ -74,6 +77,7 @@ public class SerieService {
         listaSeries = repository.findAll();
         System.out.println("Series salvas: \n");
         listaSeries.forEach(s-> System.out.println(s.getTitulo()));
+        return converteDados(listaSeries);
 
     }
 
@@ -157,7 +161,7 @@ public class SerieService {
 
     }
 
-    public void buscarTop5Series() {
+    public List<SerieDTO> buscarTop5Series() {
         List<Serie> seriesEncontradas =
                 repository.findTop5ByOrderByAvaliacaoDesc();
 
@@ -166,8 +170,11 @@ public class SerieService {
 
         }else {
             System.out.println("Séries encontradas: ");
-            seriesEncontradas.forEach(s-> System.out.println(s.getTitulo() + " Nota: " + s.getAvaliacao() ));
+            seriesEncontradas.forEach(s -> System.out.println(s.getTitulo() + " Nota: " + s.getAvaliacao()));
+            listaSeriesDTO = converteDados(seriesEncontradas);
         }
+        return listaSeriesDTO;
+
     }
 
     public void buscarSeriesPorCategoria() {
@@ -196,6 +203,41 @@ public class SerieService {
             System.out.println("Series encontradas: ");
             listaSeries.forEach(System.out::println);
         }
+    }
+
+    private List<SerieDTO> converteDados(List<Serie> series){
+        return series.stream().map(s -> new SerieDTO(
+                s.getId(),
+                s.getTitulo(),
+                s.getTotalTemporadas(),
+                s.getAvaliacao(),
+                s.getGenero(),
+                s.getAtores(),
+                s.getPoster(),
+                s.getSinopse())).collect(Collectors.toList());
+    }
+
+    public List<SerieDTO> obterLancamentos() {
+        return converteDados(repository.lancamentosMaisRecentes());
+    }
+
+    public SerieDTO buscarSerie(Long id){
+        Optional<Serie> serieOptional =
+                repository.findById(id);
+        if (serieOptional.isPresent()) {
+            Serie s = serieOptional.get();
+
+            return new SerieDTO(s.getId(),
+                    s.getTitulo(),
+                    s.getTotalTemporadas(),
+                    s.getAvaliacao(),
+                    s.getGenero(),
+                    s.getAtores(),
+                    s.getPoster(),
+                    s.getSinopse());
+        }
+
+        return null;
     }
 }
 
